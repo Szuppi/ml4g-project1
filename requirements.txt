@@ -1,0 +1,7 @@
+numpy==2.4.6
+pandas==3.0.6
+scipy==1.17.1
+scikit-learn==1.9.1
+torch==2.14.1
+catboost==1.2.10
+pyBigWig==0.3.26
