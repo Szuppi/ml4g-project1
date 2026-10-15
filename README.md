@@ -2,13 +2,13 @@
 
 Three compact approaches for gene-expression ranking from seven chromatin assays. Each approach has its own folder, X1/X2 validation predictions, performance table, and ready-made `submission.csv`.
 
-Transfer rerun in progress: 0/4 model/protocol result tables complete. Joint results and all submission files are already available.
+All results complete.
 
 | Approach | X1 → X2 | X2 → X1 | Joint X1/X2 |
 | --- | ---: | ---: | ---: |
-| Ranking CNN | Running | Running | 0.845718 |
-| CatBoost | Running | Running | 0.841608 |
-| Equal-rank CNN + CatBoost | Running | Running | 0.847839 |
+| Ranking CNN | 0.809342 | 0.830220 | 0.845718 |
+| CatBoost | 0.803047 | 0.825734 | 0.841608 |
+| Equal-rank CNN + CatBoost | 0.807420 | 0.829167 | 0.847839 |
 
 Scores are mean per-cell Spearman correlations across two chromosome folds, seed 42. Joint scores average X1 and X2 separately; transfer scores evaluate only the target cell. Fold-level scores and sample counts are in each `results/metrics.csv`.
 
