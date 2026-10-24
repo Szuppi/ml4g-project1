@@ -3,8 +3,11 @@ import numpy as np
 import torch
 from torch import nn
 from sklearn.preprocessing import StandardScaler
+
+
 def _signed_log(x):
     return np.sign(x) * np.log1p(np.abs(x))
+
 
 def _preprocess(feature_data, train, dev, kind):
     selected = np.r_[np.flatnonzero(train), np.flatnonzero(dev)]
@@ -35,6 +38,7 @@ def _preprocess(feature_data, train, dev, kind):
         arrays.update(profile_mean=profile_scaler.mean_, profile_scale=profile_scaler.scale_)
     return train_inputs, dev_inputs, arrays
 
+
 class _Residual(nn.Module):
     def __init__(self, width, dropout):
         super().__init__()
@@ -44,6 +48,7 @@ class _Residual(nn.Module):
 
     def forward(self, x):
         return self.activation(x + self.layers(x))
+
 
 def _predict(model, inputs, device, batch_size):
     model.eval()
@@ -57,6 +62,7 @@ def _predict(model, inputs, device, batch_size):
         raise RuntimeError("Nonfinite neural predictions; result rejected.")
     return result
 
+
 class CNN(nn.Module):
     def __init__(self, tab_dim):
         super().__init__()
@@ -65,7 +71,10 @@ class CNN(nn.Module):
             nn.Conv1d(28, width, 7, padding=3), nn.GELU(),
             _Residual(width, dropout), nn.MaxPool1d(2),
             _Residual(width, dropout), _Residual(width, dropout),
-            nn.AdaptiveAvgPool1d(10), nn.Flatten())
+            # Input here is length 50 (100 -> MaxPool1d(2) -> 50), so AvgPool1d(5) is
+            # numerically identical to AdaptiveAvgPool1d(10) but has a deterministic CUDA
+            # backward (adaptive_avg_pool lacks one). Enables reproducible GPU training.
+            nn.AvgPool1d(5), nn.Flatten())
         self.context = nn.Sequential(nn.Linear(tab_dim, 64), nn.GELU(), nn.Dropout(dropout))
         self.head = nn.Sequential(nn.Linear(width * 10 + 64, 128), nn.GELU(),
                                   nn.Dropout(dropout), nn.Linear(128, 1), nn.Softplus())
