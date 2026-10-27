@@ -1,5 +1,7 @@
 # Ranking CNN
 
+**Kaggle submission:** Yes — ranking CNN (`submission.csv`), public score **0.83805**.
+
 **Approach and architecture.** A compact residual CNN predicts one expression-ranking score per gene from seven chromatin assays. Its spatial branch applies a 64-channel convolution, three residual blocks and max/average pooling to the promoter profile. A separate 64-unit dense branch processes coarse chromatin summaries. Their outputs are concatenated and passed through a 128-unit prediction head with a positive output. Training uses eight epochs of AdamW, rank-target MSE plus a small within-cell pairwise ranking loss, and averaged weights from epochs 6–8.
 
 **Feature extraction.** `prepare.py` centers each gene on the midpoint of its transcription start site (TSS) and reverses spatial order for negative-strand genes. BigWig signals become 100 bins of 100 bp across ±5 kb. Each assay contributes signal, coverage and two missing-value indicators, giving 28 input channels. The dense branch receives 119 summaries: signal means and coverage in five promoter regions and three gene-body segments, plus each assay's maximum overlapping BED peak signal within ±5 kb.

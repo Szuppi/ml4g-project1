@@ -1,0 +1,1 @@
+{"steps":[{"model":"wide_combo","normalization":"quantile","cut":1.05,"weight":1},{"model":"tree_log","normalization":"absolutehalf","cut":1.0,"weight":17},{"model":"wide","normalization":"original","cut":1.075,"weight":1}]}

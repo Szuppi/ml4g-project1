@@ -1,5 +1,7 @@
 # Equal-rank CNN + CatBoost
 
+**Kaggle submission:** No. This earlier two-model ensemble was not the submitted 11- or 14-model blend.
+
 **Approach and architecture.** This ensemble combines the [ranking CNN](../cnn/README.md) and [CatBoost model](../gradient_boosting/README.md) with equal weight. The CNN learns spatial patterns in promoter profiles; the trees learn nonlinear relationships between engineered spatial, relative-signal and gene-context features. Their complementary predictions are combined without fitting another model.
 
 **Features and preprocessing.** The ensemble performs no additional genomic feature extraction. Both constituents use the same gene/TSS coordinates and seven chromatin assays, with strand-oriented windows and separate signal coverage. The CNN uses standardized, signed-log promoter profiles and coarse summaries with missingness indicators. CatBoost uses the larger 1,565-feature table directly, retaining NaN values. Each constituent computes its expression-rank targets and any fitted preprocessing from training rows only, then calibrates low scores using source validation. The linked approach READMEs describe these feature pipelines in more detail.
