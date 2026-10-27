@@ -36,7 +36,7 @@ def build(base_path, output_path):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--base', type=Path, default=ROOT.parent / 'blend_11/submission.csv')
+    parser.add_argument('--base', type=Path, default=ROOT.parent / 'ensemble_multimodel/submission.csv')
     parser.add_argument('--output', type=Path, default=ROOT / 'submission.csv')
     args = parser.parse_args()
     build(args.base, args.output)
