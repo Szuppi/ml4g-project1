@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parent
 
 
 def build(output):
-    info = json.loads((ROOT.parent / 'ensemble_multimodel_wide/components/inference_manifest.json').read_text())
+    info = json.loads((ROOT.parent / 'ensemble_14_wide_context/components/inference_manifest.json').read_text())
     genes = info['genes']
     values = np.load(ROOT / 'production_absolutehalf.npy')
     if len(values) != len(genes) or len(set(genes)) != len(genes) or not np.isfinite(values).all():
