@@ -15,7 +15,7 @@ Code and saved predictions for the three submitted approaches: the ranking CNN, 
 
 The public Kaggle scores for the submitted files are **0.83805** (CNN), **0.85102** (11 models) and **0.85305** (14 models). The submission status and score are stated in each approach README. The other three folders are components or an earlier experiment, with no separate Kaggle submission.
 
-`prepare.py` and `common.py` hold the shared preparation and validation utilities for the original CNN and CatBoost. Each model or ensemble has its own short README.
+`prepare.py` and `common.py` hold the original shared preparation and validation utilities. [The reproduction guide](reproduction/README.md) gives the complete course-data-to-submission path, training runners and all 14 production checkpoints. Each model or ensemble has its own short README.
 
 ## Rebuild the submitted files
 
@@ -26,6 +26,6 @@ python ensemble_11_rank_blend/build_submission.py
 python ensemble_14_wide_context/build_submission.py
 ```
 
-The scripts check gene order, component lengths and finite values. They reproduce the bundled prediction CSVs exactly from saved constituent outputs. The full training and checkpoint inference of every later ensemble member was performed separately; these replay commands do not retrain all members from the course archives. The CNN validation workflow starts with `python prepare.py --data /path/to/extracted/course/data --output inputs` and `python cnn/train.py --inputs inputs`.
+The scripts check gene order, component lengths and finite values. They reproduce the bundled prediction CSVs exactly from saved constituent outputs. For a fresh run from the extracted course archives, including all constituent predictions, follow `reproduction/README.md`. The CNN validation workflow starts with `python prepare.py --data /path/to/extracted/course/data --output inputs` and `python cnn/train.py --inputs inputs`.
 
 The ensemble weights and thresholds are fixed in each `recipe.json`. Source-cell transfer and joint validation used chromosome holdouts. The repository does not contain raw course data.
