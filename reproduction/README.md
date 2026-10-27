@@ -14,7 +14,7 @@ python reproduction/predict_from_checkpoints.py --inputs /path/to/prepared --out
 python reproduction/build_submissions.py --inputs /path/to/prepared --components /path/to/predictions/components.npz --output /path/to/submissions
 ```
 
-The two results are `/path/to/submissions/ensemble_11.csv` and `ensemble_14.csv`. `prepare_all.py` writes `metadata.csv`, `features.npz`, `coarse.npy`, `bins.npy`, `relative.npy` and `rich.npy` in the prepared directory. The checkpoint files are in `checkpoints/`; their SHA-256 digests are in `checkpoint_hashes.json`. The fixed blend parameters are in the two ensemble `recipe.json` files. `build_submissions.py` checks the expected test-gene order and all 14 output lengths.
+The two results are `/path/to/submissions/ensemble_11.csv` and `ensemble_14.csv`; the selected 14-member file is also written as `/path/to/submissions/submission.csv`. `prepare_all.py` writes `metadata.csv`, `features.npz`, `coarse.npy`, `bins.npy`, `relative.npy` and `rich.npy` in the prepared directory. The checkpoint files are in `checkpoints/`; their SHA-256 digests are in `checkpoint_hashes.json`. The fixed blend parameters are in the two ensemble `recipe.json` files. `build_submissions.py` checks the expected test-gene order and all 14 output lengths.
 
 This complete course-data-to-CSV path was run on 27 October 2026 with the bundled production checkpoints. Both outputs matched the archived submitted files byte for byte: 11 members `8ab47a3136c09c703e1a99df1133a27c03247b3c38712bc74f27d125e0c7801a`; 14 members `d93e9b38071cd8cc1f32b48951fd736ef756034093415baf4fef58e891095230` (SHA-256). This verifies the saved-checkpoint reconstruction; separately retraining every member may depend on the pinned Kaggle runtime.
 

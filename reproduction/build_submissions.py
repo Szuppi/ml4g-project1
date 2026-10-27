@@ -54,6 +54,7 @@ def build(inputs, components, output):
         member = 2 * rankdata(np.where(raw <= cutoff, 0, raw))
         score = (100 - step['weight']) * 2 * rankdata(score) + step['weight'] * member
     write_csv(genes, score, output / 'ensemble_14.csv')
+    write_csv(genes, score, output / 'submission.csv')
 
 
 if __name__ == '__main__':
