@@ -1,50 +1,30 @@
 # Chromatin-to-expression prediction
 
-Three compact approaches for gene-expression ranking from seven chromatin assays. Each approach has its own folder, X1/X2 validation predictions, performance table, and ready-made `submission.csv`.
+Three submitted prediction recipes using seven chromatin assays and the labelled X1/X2 cells. The repository includes the submitted CSVs, fixed blend code, and chromosome-held-out source scores. The blend scripts regenerate the exact CSV files from saved constituent predictions; see the reproducibility scope below.
 
-All results complete.
-
-| Approach | X1 → X2 | X2 → X1 | Joint X1/X2 |
+| Submitted approach | X1 → X2 | X2 → X1 | Joint X1/X2 |
 | --- | ---: | ---: | ---: |
-| Ranking CNN | 0.809342 | 0.830220 | 0.845718 |
-| CatBoost | 0.803047 | 0.825734 | 0.841608 |
-| Equal-rank CNN + CatBoost | 0.807420 | 0.829167 | 0.847839 |
+| Ranking CNN (`cnn/`) | 0.809342 | 0.830220 | 0.845718 |
+| Eleven-model blend (`blend_11/`) | 0.832914 | 0.831150 | 0.854925 |
+| Fourteen-model blend (`blend_14/`) | 0.831785 | 0.831030 | 0.854837 |
 
-Scores are mean per-cell Spearman correlations across two chromosome folds, seed 42. Joint scores average X1 and X2 separately; transfer scores evaluate only the target cell. Fold-level scores and sample counts are in each `results/metrics.csv`.
+The CNN numbers average two chromosome folds (D1 and D2). The later blend numbers use the D1 chromosome holdout and are therefore **not directly comparable** with the CNN's two-fold averages. Joint scores average X1 and X2 cell scores. The per-cell values and sample counts are in each `source_scores.csv` or the CNN's `results/metrics.csv`. These were development checks used to choose models and weights, not an untouched confirmation set.
 
 ## Approaches
 
-- `cnn/`: 64-channel residual CNN on ±5 kb chromatin profiles, plus coarse features. Eight epochs, MSE on within-cell empirical expression ranks plus 0.01 pairwise ranking loss; average weights from epochs 6–8. AdamW, learning rate 0.001, batch size 256, dropout 0.3.
-- `gradient_boosting/`: CatBoost, 960 trees, depth 5, learning rate 0.05, L2 10. 1,565 features: coarse signal/coverage/peaks, spatial bins at ±5/20/100 kb, relative signal and gene geometry.
-- `ensemble/`: equal average-tie ranks of the two component predictions, computed separately within each cell and fold. No additional fitting.
+- **Ranking CNN:** a 64-channel residual network processes strand-oriented ±5 kb assay profiles and coarse features. It predicts within-cell expression rank with MSE plus a small pairwise ranking loss. `cnn/README.md` describes the training recipe.
+- **Eleven-model blend:** eight CNNs and three CatBoost models. Five initial models combine calibrated ranks in fixed stages; a richer-feature tree, two seeded CNNs and an additional tree enter at small weights. Two activity/positive-rank CNNs form another group, combined at 30% with the base group. The exact cutoffs, weights and tie handling are in `blend_11/recipe.json` and `build_submission.py`.
+- **Fourteen-model blend:** starts from the eleven-model prediction and adds a wide-context CNN, a wide-context source-weighted CNN and an Ordered CatBoost trained on log expression. Three fixed rank-blend steps are in `blend_14/recipe.json` and `build_submission.py`.
 
-Shared preparation and evaluation helpers stay at the repository root to avoid duplicated code. No raw data or model checkpoints are committed.
+## Run
 
-## Reproduce X1/X2 results
-
-Use Python 3.11 and install `requirements.txt` in an isolated environment. Obtain the course data separately and extract the archives, retaining assay directory names. Preparation reads only `X1_train`, `X1_val`, `X2_train`, and `X2_val` info/label TSVs, plus their BigWig and BED tracks.
+Use Python 3.11 with NumPy, pandas and SciPy from `requirements.txt`.
 
 ```bash
-python prepare.py --data /path/to/extracted/course/data --output inputs
-python cnn/train.py --inputs inputs
-python gradient_boosting/train.py --inputs inputs
-python ensemble/blend.py
+python blend_11/build_submission.py
+python blend_14/build_submission.py
 ```
 
-`prepare.py` writes aligned `metadata.csv`, `features.npz`, and `tree_features.npy`. Feature windows use zero-based half-open coordinates, TSS interval midpoint, and strand orientation. Uncovered signal stays NaN; coverage is stored separately. Wider-profile summaries use covered-base weights. The preparation code does not fit any transform.
+Both commands check gene order, component lengths and finite values. The bundled component arrays are model outputs; running the scripts reproduces `blend_11/submission.csv` and `blend_14/submission.csv` byte for byte. The original model fits and checkpoint inference were performed separately. This bundle does **not** retrain all blend members from the course archives. For the first approach, `python prepare.py --data /path/to/extracted/course/data --output inputs` followed by `python cnn/train.py --inputs inputs` runs the source validation workflow. The saved CNN submission is the original full-source prediction.
 
-D1 evaluates chr3/11; D2 evaluates chr17/21/22. Fitting excludes the evaluated chromosomes and chr1/12/18. The remaining chromosomes from both labelled source splits are available for fitting. Transfer fits only the named source cell. All normalization and rank targets use training rows only. Zero-score calibration maximizes the worst source-cell validation correlation on a fixed grid; target-cell expression never selects it in transfer. The checkpoint recipe is fixed before the transfer rerun.
-
-These are development folds used during model exploration, not independent confirmation. Joint predictions are reused from the saved audited runs. Transfer predictions are fresh fits of these same recipes; they must not be substituted with results from other model variants.
-
-## Files to use
-
-`results/x1_to_x2.csv`, `results/x2_to_x1.csv`, and `results/joint.csv` contain gene keys, raw labels, and predictions on the evaluated chromosomes. `metrics.csv` contains their fold-level scores. CNN and tree CSVs also retain continuous predictions before source calibration. The ensemble retains summed doubled ranks, which have the same ordering as equal average ranks.
-
-Each approach's `submission.csv` has exactly `gene_name,gex_predicted`, 1,984 unique genes, and finite scores in the required order. Saved production constituents were fitted on all 32,568 labelled X1/X2 rows. Production zero cutoffs use the source-derived median factors: CNN 0.95 and CatBoost 0.80. The ensemble combines their equal ranks. Submission files are distinct from chromosome-validation predictions and have not been submitted by this repository workflow. Scores are relative ordering values, not calibrated expression units or fold changes.
-
-Regenerating the commands above reproduces the X1/X2 evaluation workflow; it does not overwrite the bundled production submission files. Checkpoints and training normalization are saved under `results/models/` locally and ignored by Git.
-
-## Team access
-
-This repository is private. The owner can invite teammates through **Settings → Collaborators → Add people**. Invited teammates need a GitHub account and must accept the invitation.
+The transfer checks fit on one source cell and evaluate the other on held-out chromosomes; the joint checks fit both source cells. Source validation excludes chr1/3/11/12/18 from fitting and evaluates chr3/11. Fold-specific normalization and rank targets use training rows. All blend weights are fixed across the three protocols. No raw course data or model checkpoints are committed.
