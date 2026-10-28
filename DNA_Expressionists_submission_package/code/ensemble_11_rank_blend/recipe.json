@@ -1,0 +1,37 @@
+{
+  "base": {
+    "alphas": [
+      0.9,
+      0.85,
+      0.9,
+      0.93,
+      1.005
+    ],
+    "weights": [
+      90,
+      9,
+      51,
+      50
+    ],
+    "rich_weight": 2,
+    "rich_alpha": 0.98,
+    "seed_weight": 1,
+    "seed_alpha": 0.855,
+    "extra_alpha": 0.95,
+    "extra_weight": 9
+  },
+  "heads": {
+    "kind": "blend",
+    "weight": 30,
+    "models": [
+      "basic",
+      "combo"
+    ],
+    "basic_weight": 0.5,
+    "normalization": "quantile",
+    "gamma": 4.0,
+    "floor": "training",
+    "floor_scale": 1.25,
+    "activity_cut": 0.65
+  }
+}
