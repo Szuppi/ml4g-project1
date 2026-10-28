@@ -6,3 +6,7 @@ data/
 **/models/
 *.npy
 *.npz
+# combined-models working artifacts
+combined/prepared_ensemble/
+combined/work/
+combined/oof_ensemble/*.npz
